@@ -24,28 +24,20 @@ public class MetaFileUpdater extends Thread {
 				synchronized (in) {
 					synchronized (out) {
 						try (DataOutputStream fileOut = new DataOutputStream(new FileOutputStream(file.toString(), false))) {
-						out.writeInt(5);
-						int state = in.readInt();
-						if (state != 0) {
-							System.out.println(in.readUTF());
-							return;
-						}
-						int cntUsers = in.readInt();
-						PrintWriter pw = new PrintWriter(file.toString());
-						pw.close();
-						fileOut.writeInt(cntUsers);
-						for (int i = 0; i < cntUsers; ++i) {
-							fileOut.writeUTF(in.readUTF());
-							fileOut.writeUTF(in.readUTF());
-							fileOut.writeInt(in.readInt());
-						}
-						} catch (Exception e) {
-							e.printStackTrace();
-							try {
-								in.close();
-								out.close();
-							} catch (IOException e1) {
-								e1.printStackTrace();
+							out.writeInt(5);
+							int state = in.readInt();
+							if (state != 0) {
+								System.out.println(in.readUTF());
+								return;
+							}
+							int cntUsers = in.readInt();
+							PrintWriter pw = new PrintWriter(file.toString());
+							pw.close();
+							fileOut.writeInt(cntUsers);
+							for (int i = 0; i < cntUsers; ++i) {
+								fileOut.writeUTF(in.readUTF());
+								fileOut.writeUTF(in.readUTF());
+								fileOut.writeInt(in.readInt());
 							}
 						}
 					}

@@ -51,10 +51,6 @@ public class MiniServer {
 								out.writeUTF("File doesn't exist or cannot open.");
 								out.flush();
 							}
-
-						} catch (IOException ioe) {
-							ioe.printStackTrace();
-							System.out.println("A problem with mini server socket occured.");
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -66,6 +62,12 @@ public class MiniServer {
 	}
 
 	public void close() {
+		try {
+			serverSocket.close();
+		} catch (IOException e) {
+			System.out.println("Couldn't close socket" + serverSocket.toString());
+			e.printStackTrace();
+		}
 		toClose = true;
 	}
 }

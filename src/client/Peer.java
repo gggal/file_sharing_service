@@ -23,7 +23,23 @@ public class Peer {
 	private DataOutputStream out;
 	
 	public Peer(String username, int miniServerPort, int clientPort, int serverPort) throws Exception {
-		this(username, miniServerPort, clientPort, serverPort, "localhost");
+		/*
+		 * String myIP;
+	    try {
+	        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+	        while (interfaces.hasMoreElements()) {
+	            NetworkInterface iface = interfaces.nextElement();
+	            
+	            if (!iface.isLoopback() && iface.isUp()) {
+	            	Enumeration<InetAddress> addresses = iface.getInetAddresses();
+	            	while(addresses.hasMoreElements()) {
+	                	myIP = addr.getHostAddress();
+	            }
+	        }
+	    } catch (SocketException e) {
+	        throw new RuntimeException(e);
+	    }*/
+		this(username, miniServerPort, clientPort, serverPort, "localhost"); //myIP
 	}
 	
 	public Peer(String username, int miniServerPort, int ClientPort, int serverPort, String serverAddress) throws Exception {
@@ -34,7 +50,8 @@ public class Peer {
 			in = new DataInputStream(peerSocket.getInputStream());
 			out.writeInt(1);
 			out.writeInt(miniServerPort);
-			out.writeUTF("localhost");
+			
+			out.writeUTF(serverAddress);
 			out.writeUTF(username);
 			out.flush();
 
@@ -45,6 +62,7 @@ public class Peer {
 				throw new Exception(in.readUTF());
 			}
 			MetaFileUpdater updater = new MetaFileUpdater(in, out);
+			updater.setDaemon(true);
 			updater.start();
 			miniServer.start();
 			System.out.println("Socket created on port " + peerSocket.getLocalPort());
@@ -75,7 +93,7 @@ public class Peer {
 	}
 
 	private int download(String command) {
-		String[] words = command.split("[ \t]");
+		String[] words = command.split("[ \n\t]");
 		words = Arrays.copyOfRange(words, 1, words.length);
 		String info = findPeer(words[0]);
 		if (info == null) {
@@ -249,13 +267,14 @@ public class Peer {
 	public static void main(String[] args) {
 		Peer peer;
 		try {
-			if(args.length < 4 || args.length > 5) {
-				System.out.println("Invalid argument count. Given arguemnts should be"
-						+ "mini server port, client port, server port and/or server address");
-				return;
-			}
-			else {
+			if(args.length == 4) 
 				peer = new Peer(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+			else if(args.length == 5)
+				peer = new Peer(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), args[4]);
+			else {
+				System.out.println("Invalid argument count. Given arguemnts should be"
+						+ "username, mini server port, client port, server port and/or server address");
+				return;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -266,7 +285,7 @@ public class Peer {
 		try {
 			// peer.executeCommand("list-files");
 			// peer.executeCommand("register f1.txt");
-			@SuppressWarnings("resource")
+			//@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 			String command = scanner.nextLine();;
 			while (!command.equals("close")) {
